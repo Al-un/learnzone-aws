@@ -11,6 +11,10 @@
 
   <body>
     <h1>Rails on AWS</h1>
+    <nav>
+      <%= link_to "Employees", employees_path %>
+      <%= link_to "Project", projects_path %>
+    </nav>
     <%= yield %>
   </body>
 </html>
