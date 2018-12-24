@@ -64,9 +64,18 @@ jobs:
             sudo pip install awsebcli --upgrade 
       - run: ls
       - run: ls .elasticbeanstalk
-      - run: eb list
+      - run:
+          name: Create AWS credentials manually
+          command: |
+            mkdir ~/.aws
+            touch ~/.aws/config
+            chmod 600 ~/.aws/config
+            echo "[profile eb-cli]" > ~/.aws/config
+            echo "aws_access_key_id=$AWS_ACCESS_KEY_ID" >> ~/.aws/config
+            echo "aws_secret_access_key=$AWS_SECRET_ACCESS_KEY" >> ~/.aws/config
+      - run: eb list --profile eb-cli
       - run:
           name: Deploy to AWS EB
           command: |
-            eb use learnzone-aws-stag
-            eb deploy learnzone-aws-stag
+            eb use learnzone-aws-stag --profile eb-cli
+            eb deploy learnzone-aws-stag --profile eb-cli
