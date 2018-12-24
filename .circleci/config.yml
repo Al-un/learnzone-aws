@@ -50,6 +50,12 @@ jobs:
       - image: buildpack-deps:trusty
     steps:
       - checkout
+      - run: 
+          name: Install EB CLI
+          command: |
+            sudo apt-get -y update
+            sudo apt-get install python-pip python-dev build-essential
+            sudo pip install awsebcli --upgrade 
       - run:
           name: Deploy to AWS EB
-          command: echo "TODO deployment"
+          command: eb deploy learnzone-aws-stag
