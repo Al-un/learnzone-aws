@@ -1,14 +1,15 @@
 branch-defaults:
   master:
-    environment: learnzone-aws-stag
+    environment: learnzone-aws
 environment-defaults:
-  learnzone-aws-stag:
+  learnzone-aws:
     branch: null
     repository: null
 global:
-  application_name: learnzone-aws
+  application_name: learnzone
   default_ec2_keyname: null
-  default_platform: arn:aws:elasticbeanstalk:eu-west-3::platform/Puma with Ruby 2.5
+  default_platform:
+    arn:aws:elasticbeanstalk:eu-west-3::platform/Puma with Ruby 2.5
     running on 64bit Amazon Linux/2.8.7
   default_region: eu-west-3
   include_git_submodules: true
