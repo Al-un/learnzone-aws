@@ -4,14 +4,22 @@ workflows:
   build-deploy:
     jobs:
       - build
-      - deploy:
+      - deploy-prod:
           requires:
             - build
+          filters:
+            branches:
+              only: master
+      - deploy-dev:
+          requires:
+            - build
+          filters:
+            branches:
+              only: develop
 
 version: 2
 
 jobs:
-
   build:
     docker:
       # specify the version you desire here
@@ -23,7 +31,7 @@ jobs:
           DATABASE_TEST_URL: postgresql://root@localhost/circle_test
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/ 
+      # documented at https://circleci.com/docs/2.0/circleci-images/
       - image: circleci/postgres:9.6.5-alpine-ram
     working_directory: ~/repo
 
@@ -34,9 +42,9 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-          - learnzone-aws-dependencies-{{ checksum "Gemfile.lock" }}
-          # fallback to using the latest cache if no exact match is found
-          - learnzone-aws-dependencies-
+            - learnzone-aws-dependencies-{{ checksum "Gemfile.lock" }}
+            # fallback to using the latest cache if no exact match is found
+            - learnzone-aws-dependencies-
       - run:
           name: Install dependencies
           command: bundle install --jobs=4 --retry=3 --path vendor/bundle
@@ -45,25 +53,14 @@ jobs:
             - ./vendor/bundle
           key: learnzone-aws-dependencies-{{ checksum "Gemfile.lock" }}
 
-  deploy:
+  deploy-dev:
     docker:
-      - image: buildpack-deps:trusty
+      - image: circleci/python:3.7.2-stretch-node-browsers-legacy
     steps:
       - checkout
-      # - run: 
-      #     name: Install EB CLI
-      #     command: |
-      #       sudo apt-get -y -qq update
-      #       sudo apt-get install python-pip python-dev build-essential
-      #       sudo pip install awsebcli --upgrade 
-      - run: 
+      - run:
           name: Install EB CLI
-          command: |
-            sudo apt-get -y update
-            sudo apt-get -y install python-pip python-dev build-essential
-            sudo pip install awsebcli --upgrade 
-      - run: ls
-      - run: ls .elasticbeanstalk
+          command: sudo pip install awsebcli --upgrade
       - run:
           name: Create AWS credentials manually
           command: |
@@ -73,9 +70,27 @@ jobs:
             echo "[profile eb-cli]" > ~/.aws/config
             echo "aws_access_key_id=$AWS_ACCESS_KEY_ID" >> ~/.aws/config
             echo "aws_secret_access_key=$AWS_SECRET_ACCESS_KEY" >> ~/.aws/config
-      - run: eb list --profile eb-cli
       - run:
-          name: Deploy to AWS EB
+          name: Deploy to AWS EB (Dev)
+          command: eb deploy learnzone-aws-dev --profile eb-cli --label learnzone-aws-dev-$CIRCLE_BUILD_NUM
+
+  deploy-prod:
+    docker:
+      - image: circleci/python:3.7.2-stretch-node-browsers-legacy
+    steps:
+      - checkout
+      - run:
+          name: Install EB CLI
+          command: sudo pip install awsebcli --upgrade
+      - run:
+          name: Create AWS credentials manually
           command: |
-            eb use learnzone-aws --profile eb-cli
-            eb deploy learnzone-aws --profile eb-cli
+            mkdir ~/.aws
+            touch ~/.aws/config
+            chmod 600 ~/.aws/config
+            echo "[profile eb-cli]" > ~/.aws/config
+            echo "aws_access_key_id=$AWS_ACCESS_KEY_ID" >> ~/.aws/config
+            echo "aws_secret_access_key=$AWS_SECRET_ACCESS_KEY" >> ~/.aws/config
+      - run:
+          name: Deploy to AWS EB (Prod)
+          command: eb deploy learnzone-aws --profile eb-cli --label learnzone-aws-$CIRCLE_BUILD_NUM
