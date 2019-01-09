@@ -5,10 +5,10 @@ branch-defaults:
     environment: learnzone-aws
 environment-defaults:
   learnzone-aws:
-    branch: null
+    branch: master
     repository: null
   learnzone-aws-dev:
-    branch: null
+    branch: develop
     repository: null
 global:
   application_name: learnzone
