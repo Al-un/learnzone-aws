@@ -55,7 +55,7 @@ jobs:
 
   deploy-dev:
     docker:
-      - image: python:3.7.2-stretch-node-browsers-legacy
+      - image: circleci/python:3.7.2-stretch-node-browsers-legacy
     steps:
       - checkout
       - run:
@@ -72,11 +72,11 @@ jobs:
             echo "aws_secret_access_key=$AWS_SECRET_ACCESS_KEY" >> ~/.aws/config
       - run:
           name: Deploy to AWS EB (Dev)
-          command: eb deploy learnzone-aws-dev --profile eb-cli
+          command: eb deploy learnzone-aws-dev --profile eb-cli --label learnzone-aws-dev-$CIRCLE_BUILD_NUM
 
   deploy-prod:
     docker:
-      - image: python:3.7.2-stretch-node-browsers-legacy
+      - image: circleci/python:3.7.2-stretch-node-browsers-legacy
     steps:
       - checkout
       - run:
@@ -93,4 +93,4 @@ jobs:
             echo "aws_secret_access_key=$AWS_SECRET_ACCESS_KEY" >> ~/.aws/config
       - run:
           name: Deploy to AWS EB (Prod)
-          command: eb deploy learnzone-aws --profile eb-cli
+          command: eb deploy learnzone-aws --profile eb-cli --label learnzone-aws-$CIRCLE_BUILD_NUM
