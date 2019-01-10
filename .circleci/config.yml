@@ -1,5 +1,5 @@
 workflows:
-  version: 2.1
+  version: 2
   # Staging deployment
   build-deploy:
     jobs:
@@ -30,7 +30,7 @@ workflows:
       - schedule:
           # https://crontab.guru/
           # Time is UTC
-          cron: '20 * * * *'
+          cron: '31 * * * *'
           filters:
             branches:
               only:
@@ -43,17 +43,17 @@ version: 2.1
 # Requires 2.1: https://circleci.com/docs/2.0/configuration-reference/#executors-requires-version-21
 executors:
   app-builder:
-    - docker:
-        - image: circleci/ruby:2.5.1-node-browsers
-        # Examples
-        # environment:
-        #   RAILS_ENV: test
-        #   DATABASE_TEST_URL: postgresql://root@localhost/circle_test
-        # If there were a need of a DB for testing
-        - image: circleci/postgres:9.6.5-alpine-ram
-      working_directory: ~/repo
+    docker:
+      - image: circleci/ruby:2.5.1-node-browsers
+      # Examples
+      # environment:
+      #   RAILS_ENV: test
+      #   DATABASE_TEST_URL: postgresql://root@localhost/circle_test
+      # If there were a need of a DB for testing
+      - image: circleci/postgres:9.6.5-alpine-ram
+    working_directory: ~/repo
   aws-deployer:
-    - docker: circleci/python:3.7.2-stretch-node-browsers-legacy
+    docker: circleci/python:3.7.2-stretch-node-browsers-legacy
 
 # Requires 2.1: https://circleci.com/docs/2.0/configuration-reference/#commands-requires-version-21
 commands:
@@ -82,7 +82,6 @@ commands:
 jobs:
   build:
     executor: app-builder
-
     steps:
       - checkout
       # Download and cache dependencies
