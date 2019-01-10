@@ -13,32 +13,25 @@ workflows:
       - build
       - deploy-dev:
           requires:
-            - manual_lock
+            - approval
             # - build
           filters:
             branches:
               only: develop
+      # lock_notif
+      - before_approval:
+          requires: build
       # testing manual approval
-      - manual_lock: # <<< A job that will require manual approval in the CircleCI web application.
+      - approval: # <<< A job that will require manual approval in the CircleCI web application.
           type: approval # <<< This key-value pair will set your workflow to a status of "On Hold"
           requires: # We only run the "hold" job when test2 has succeeded
-            - build
-          steps:
-            - slack/notify:
-                # Optional: Enter your own message
-                message: 'A deploy is on hold for a manual approval for http://learnzone-aws-dev.eu-west-3.elasticbeanstalk.com/'
-                # Optional: Enter the Slack IDs of any user or group (sub_team) to be mentioned
-                mentions: 'al-un'
-                # Optional: Assign custom colors for each notification
-                color: '#e5bd0b'
-                # Optional: Enter a specific webhook here or the default will use $SLACK_WEBHOOK
-                # webhook: 'webhook'
+            - before_approval
           # filters:
           #   branches:
           #     only: master
       - deploy-prod:
           requires:
-            - manual_lock
+            - approval
           filters:
             branches:
               only: master
@@ -133,6 +126,20 @@ jobs:
           key: learnzone-aws-dependencies-{{ checksum "Gemfile.lock" }}
       - slack/notify
 
+  # Hey! approve!
+  before_approval:
+    executor: app-builder
+    steps:
+      - slack/notify:
+          # Optional: Enter your own message
+          message: 'A deploy is on hold for a manual approval for http://learnzone-aws-dev.eu-west-3.elasticbeanstalk.com/'
+          # Optional: Enter the Slack IDs of any user or group (sub_team) to be mentioned
+          mentions: 'al-un'
+          # Optional: Assign custom colors for each notification
+          color: '#e5bd0b'
+          # Optional: Enter a specific webhook here or the default will use $SLACK_WEBHOOK
+          # webhook: 'webhook'
+
   # Deploy to dev
   deploy-dev:
     executor: aws-deployer
@@ -141,7 +148,7 @@ jobs:
       - deploy-aws-eb:
           env: learnzone-aws-dev
       - slack/status:
-          mentions: "al-un"
+          mentions: 'al-un'
 
   # Deploy to prod
   deploy-prod:
