@@ -1,15 +1,18 @@
+# Define default environment when on a given git branch. Don't know how to
+# make it work with pattern such as "release/*"
 branch-defaults:
   develop:
     environment: learnzone-aws-dev
   master:
     environment: learnzone-aws
+# Default AWS CodeCommit repository/branch
 environment-defaults:
   learnzone-aws:
-    branch: master
-    repository: https://github.com/Al-un/learnzone-aws.git
+    branch: null
+    repository: null
   learnzone-aws-dev:
-    branch: develop
-    repository: https://github.com/Al-un/learnzone-aws.git
+    branch: null
+    repository: null
 global:
   application_name: learnzone
   default_ec2_keyname: learnzone
