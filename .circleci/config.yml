@@ -17,6 +17,14 @@ workflows:
           filters:
             branches:
               only: develop
+      - pouet:
+          filters:
+            branches:
+              only: /^feature\/.*/
+      - plop:
+          filters:
+            branches:
+              only: /^feature.*/
       # request approval on Slack
       - before_approval:
           requires:
@@ -92,6 +100,16 @@ commands:
 # Jobs: list of workflow jobs
 # ------------------------------------------------------------------------------
 jobs:
+  pouet:
+    docker:
+      - image: buildpack-deps:trusty
+    steps:
+      - run: echo "hello pouet branch"
+  plop:
+    docker:
+      - image: buildpack-deps:trusty
+    steps:
+      - run: echo "hello plop branch"
   # Dependencies installation
   build:
     executor: app-builder
