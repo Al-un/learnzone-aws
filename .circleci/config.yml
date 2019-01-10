@@ -21,14 +21,10 @@ workflows:
           filters:
             branches:
               only: /^feature\/.*/
-          steps:
-            - run: echo "hello from a /^feature\/.*/ branch"
       - plop:
           filters:
             branches:
               only: /^feature.*/
-          steps:
-            - run: echo "hello from a /^feature.*/ branch"
       # request approval on Slack
       - before_approval:
           requires:
@@ -104,6 +100,12 @@ commands:
 # Jobs: list of workflow jobs
 # ------------------------------------------------------------------------------
 jobs:
+  pouet:
+    steps:
+      - run: echo "hello pouet branch"
+  plop:
+    steps:
+      - run: echo "hello plop branch"
   # Dependencies installation
   build:
     executor: app-builder
