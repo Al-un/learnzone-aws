@@ -1,3 +1,8 @@
+| branch  | status                                                                                                                                         |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| master  | [![master](https://circleci.com/gh/Al-un/learnzone-aws/tree/master.svg?style=svg)](https://circleci.com/gh/Al-un/learnzone-aws/tree/master)    |
+| develop | [![develop](https://circleci.com/gh/Al-un/learnzone-aws/tree/develop.svg?style=svg)](https://circleci.com/gh/Al-un/learnzone-aws/tree/develop) |
+
 # Rails-on-AWS
 
 Testing AWS stuff:

@@ -31,7 +31,12 @@ workflows:
             - before_approval
       - deploy-prod:
           requires:
-            - approval
+            # to require manual approval, just requires "approval" job
+            - build
+          filters:
+            # if manual approval is required, this filtering is not necessary
+            branches:
+              only: master
 
 # ------------------------------------------------------------------------------
 # Executors: list of executing environments (requires version: 2.1)
@@ -55,7 +60,7 @@ orbs:
   slack: circleci/slack@1.0.0
 
 # ------------------------------------------------------------------------------
-# Executors: list of re-usable commands (requires version: 2.1)
+# Commands: list of re-usable commands (requires version: 2.1)
 # https://circleci.com/docs/2.0/configuration-reference/#commands-requires-version-21
 # ------------------------------------------------------------------------------
 commands:
