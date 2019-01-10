@@ -35,21 +35,21 @@ workflows:
       - deploy-prod:
           requires:
             - approval
-          filters:
-            branches:
-              only: master
-  nightly:
-    triggers:
-      - schedule:
-          # https://crontab.guru/
-          # Time is UTC
-          cron: '31 * * * *'
-          filters:
-            branches:
-              only:
-                - develop
-    jobs:
-      - build
+          # filters:
+          #   branches:
+          #     only: master
+  # nightly:
+  #   triggers:
+  #     - schedule:
+  #         # https://crontab.guru/
+  #         # Time is UTC
+  #         cron: '31 * * * *'
+  #         filters:
+  #           branches:
+  #             only:
+  #               - develop
+  #   jobs:
+  #     - build
 
 # ------------------------------------------------------------------------------
 # Executors: list of executing environments (requires version: 2.1)
