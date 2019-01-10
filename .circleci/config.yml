@@ -4,18 +4,39 @@ workflows:
   build-deploy:
     jobs:
       - build
-      - deploy-prod:
-          requires:
-            - build
-          filters:
-            branches:
-              only: master
       - deploy-dev:
           requires:
-            - build
+            - manual_lock
+            # - build
           filters:
             branches:
               only: develop
+      # testing manual approval
+      - manual_lock: # <<< A job that will require manual approval in the CircleCI web application.
+          type: approval # <<< This key-value pair will set your workflow to a status of "On Hold"
+          requires: # We only run the "hold" job when test2 has succeeded
+            - build
+          # filters:
+          #   branches:
+          #     only: master
+      - deploy-prod:
+          requires:
+            - manual_lock
+          filters:
+            branches:
+              only: master
+  nightly:
+    triggers:
+      - schedule:
+        # https://crontab.guru/
+        # Time is UTC
+        cron: '6 * * * *'
+        filters:
+          branches:
+            only:
+              - develop
+    jobs:
+      - build
 
 version: 2
 
