@@ -36,10 +36,6 @@ workflows:
           filters:
             branches:
               only: master
-      - slack-notif:
-          requires:
-            - deploy-dev
-            - deploy-prod
   nightly:
     triggers:
       - schedule:
@@ -52,9 +48,6 @@ workflows:
                 - develop
     jobs:
       - build
-      - slack-notif:
-          requires:
-            - build
 
 # ------------------------------------------------------------------------------
 # Executors: list of executing environments (requires version: 2.1)
@@ -163,10 +156,3 @@ jobs:
       - checkout
       - deploy-aws-eb:
           env: learnzone-aws
-
-  # Slack notif
-  slack-notif:
-    executor: aws-deployer
-    steps:
-      - slack/status:
-          mentions: 'al-un'
