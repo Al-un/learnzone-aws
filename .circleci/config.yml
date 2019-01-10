@@ -21,14 +21,14 @@ workflows:
           filters:
             branches:
               only: /^feature\/.*/
-            steps:
-              - run: echo "hello from a /^feature\/.*/ branch"
+          steps:
+            - run: echo "hello from a /^feature\/.*/ branch"
       - plop:
           filters:
             branches:
               only: /^feature.*/
-            steps:
-              - run: echo "hello from a /^feature.*/ branch"
+          steps:
+            - run: echo "hello from a /^feature.*/ branch"
       # request approval on Slack
       - before_approval:
           requires:
