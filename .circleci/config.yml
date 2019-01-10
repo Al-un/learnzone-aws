@@ -101,9 +101,13 @@ commands:
 # ------------------------------------------------------------------------------
 jobs:
   pouet:
+    docker:
+      - image: buildpack-deps:trusty
     steps:
       - run: echo "hello pouet branch"
   plop:
+    docker:
+      - image: buildpack-deps:trusty
     steps:
       - run: echo "hello plop branch"
   # Dependencies installation
