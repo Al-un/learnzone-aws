@@ -127,7 +127,6 @@ jobs:
           paths:
             - ./vendor/bundle
           key: learnzone-aws-dependencies-{{ checksum "Gemfile.lock" }}
-      - slack/notify
 
   # Hey! approve!
   before_approval:
