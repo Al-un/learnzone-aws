@@ -37,6 +37,8 @@ workflows:
             # if manual approval is required, this filtering is not necessary
             branches:
               only: master
+            tags:
+              only: /^v.*/
 
 # ------------------------------------------------------------------------------
 # Executors: list of executing environments (requires version: 2.1)
