@@ -20,7 +20,8 @@ workflows:
               only: develop
       # lock_notif
       - before_approval:
-          requires: build
+          requires: 
+            - build
       # testing manual approval
       - approval: # <<< A job that will require manual approval in the CircleCI web application.
           type: approval # <<< This key-value pair will set your workflow to a status of "On Hold"
