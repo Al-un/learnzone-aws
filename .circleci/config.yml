@@ -25,31 +25,13 @@ workflows:
             branches:
               only: master
       # testing manual approval
-      - approval: # <<< A job that will require manual approval in the CircleCI web application.
-          type: approval # <<< This key-value pair will set your workflow to a status of "On Hold"
-          requires: # We only run the "hold" job when test2 has succeeded
+      - approval:
+          type: approval
+          requires:
             - before_approval
-          # filters:
-          #   branches:
-          #     only: master
       - deploy-prod:
           requires:
             - approval
-          # filters:
-          #   branches:
-          #     only: master
-  # nightly:
-  #   triggers:
-  #     - schedule:
-  #         # https://crontab.guru/
-  #         # Time is UTC
-  #         cron: '31 * * * *'
-  #         filters:
-  #           branches:
-  #             only:
-  #               - develop
-  #   jobs:
-  #     - build
 
 # ------------------------------------------------------------------------------
 # Executors: list of executing environments (requires version: 2.1)
@@ -59,12 +41,6 @@ executors:
   app-builder:
     docker:
       - image: circleci/ruby:2.5.1-node-browsers
-      # Examples
-      # environment:
-      #   RAILS_ENV: test
-      #   DATABASE_TEST_URL: postgresql://root@localhost/circle_test
-      # If there were a need of a DB for testing
-      - image: circleci/postgres:9.6.5-alpine-ram
     working_directory: ~/repo
   aws-deployer:
     docker:
@@ -127,22 +103,16 @@ jobs:
           paths:
             - ./vendor/bundle
           key: learnzone-aws-dependencies-{{ checksum "Gemfile.lock" }}
-      - slack/notify
 
   # Hey! approve!
   before_approval:
-    docker: # executor type
-      - image: buildpack-deps:trusty # primary container will run Ubuntu Trusty
+    docker:
+      - image: buildpack-deps:trusty
     steps:
       - slack/notify:
-          # Optional: Enter your own message
           message: 'A deploy is on hold for a manual approval: https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID'
-          # Optional: Enter the Slack IDs of any user or group (sub_team) to be mentioned
-          mentions: 'alun'
-          # Optional: Assign custom colors for each notification
+          mentions: 'Alun'
           color: '#e5bd0b'
-          # Optional: Enter a specific webhook here or the default will use $SLACK_WEBHOOK
-          # webhook: 'webhook'
 
   # Deploy to dev
   deploy-dev:
