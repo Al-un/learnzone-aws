@@ -20,7 +20,7 @@ workflows:
               only: develop
       # lock_notif
       - before_approval:
-          requires: 
+          requires:
             - build
       # testing manual approval
       - approval: # <<< A job that will require manual approval in the CircleCI web application.
@@ -36,6 +36,10 @@ workflows:
           filters:
             branches:
               only: master
+      - slack-notif:
+          requires:
+            - deploy-dev
+            - deploy-prod
   nightly:
     triggers:
       - schedule:
@@ -48,6 +52,9 @@ workflows:
                 - develop
     jobs:
       - build
+      - slack-notif:
+          requires:
+            - build
 
 # ------------------------------------------------------------------------------
 # Executors: list of executing environments (requires version: 2.1)
@@ -133,9 +140,9 @@ jobs:
     steps:
       - slack/notify:
           # Optional: Enter your own message
-          message: 'A deploy is on hold for a manual approval for http://learnzone-aws-dev.eu-west-3.elasticbeanstalk.com/'
+          message: 'A deploy is on hold for a manual approval: https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID'
           # Optional: Enter the Slack IDs of any user or group (sub_team) to be mentioned
-          mentions: 'al-un'
+          mentions: 'alun'
           # Optional: Assign custom colors for each notification
           color: '#e5bd0b'
           # Optional: Enter a specific webhook here or the default will use $SLACK_WEBHOOK
@@ -148,8 +155,6 @@ jobs:
       - checkout
       - deploy-aws-eb:
           env: learnzone-aws-dev
-      - slack/status:
-          mentions: 'al-un'
 
   # Deploy to prod
   deploy-prod:
@@ -158,3 +163,10 @@ jobs:
       - checkout
       - deploy-aws-eb:
           env: learnzone-aws
+
+  # Slack notif
+  slack-notif:
+    executor: aws-deployer
+    steps:
+      - slack/status:
+          mentions: 'al-un'
