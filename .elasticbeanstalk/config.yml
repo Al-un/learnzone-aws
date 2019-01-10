@@ -6,14 +6,15 @@ branch-defaults:
 environment-defaults:
   learnzone-aws:
     branch: master
-    repository: null
+    repository: https://github.com/Al-un/learnzone-aws.git
   learnzone-aws-dev:
     branch: develop
-    repository: null
+    repository: https://github.com/Al-un/learnzone-aws.git
 global:
   application_name: learnzone
   default_ec2_keyname: learnzone
-  default_platform: arn:aws:elasticbeanstalk:eu-west-3::platform/Puma with Ruby 2.5
+  default_platform:
+    arn:aws:elasticbeanstalk:eu-west-3::platform/Puma with Ruby 2.5
     running on 64bit Amazon Linux/2.8.7
   default_region: eu-west-3
   include_git_submodules: true
