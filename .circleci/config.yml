@@ -30,7 +30,7 @@ workflows:
       - schedule:
         # https://crontab.guru/
         # Time is UTC
-        cron: '6 * * * *'
+        cron: '2 * * * *'
         filters:
           branches:
             only:
