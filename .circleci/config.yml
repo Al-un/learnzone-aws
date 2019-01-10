@@ -28,13 +28,13 @@ workflows:
   nightly:
     triggers:
       - schedule:
-        # https://crontab.guru/
-        # Time is UTC
-        cron: '2 * * * *'
-        filters:
-          branches:
-            only:
-              - develop
+          # https://crontab.guru/
+          # Time is UTC
+          cron: '5 * * * *'
+          filters:
+            branches:
+              only:
+                - develop
     jobs:
       - build
 
