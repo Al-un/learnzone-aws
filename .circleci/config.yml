@@ -17,18 +17,18 @@ workflows:
           filters:
             branches:
               only: develop
-      # request approval on Slack
-      - before_approval:
-          requires:
-            - build
-          filters:
-            branches:
-              only: master
-      # testing manual approval
-      - approval:
-          type: approval
-          requires:
-            - before_approval
+      # # request approval on Slack
+      # - before_approval:
+      #     requires:
+      #       - build
+      #     filters:
+      #       branches:
+      #         only: master
+      # # testing manual approval
+      # - approval:
+      #     type: approval
+      #     requires:
+      #       - before_approval
       - deploy-prod:
           requires:
             # to require manual approval, just requires "approval" job
