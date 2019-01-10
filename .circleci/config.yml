@@ -13,15 +13,17 @@ workflows:
       - build
       - deploy-dev:
           requires:
-            - approval
-            # - build
+            - build
           filters:
             branches:
               only: develop
-      # lock_notif
+      # request approval on Slack
       - before_approval:
           requires:
             - build
+          filters:
+            branches:
+              only: master
       # testing manual approval
       - approval: # <<< A job that will require manual approval in the CircleCI web application.
           type: approval # <<< This key-value pair will set your workflow to a status of "On Hold"
@@ -129,7 +131,8 @@ jobs:
 
   # Hey! approve!
   before_approval:
-    executor: app-builder
+    docker: # executor type
+      - image: buildpack-deps:trusty # primary container will run Ubuntu Trusty
     steps:
       - slack/notify:
           # Optional: Enter your own message
