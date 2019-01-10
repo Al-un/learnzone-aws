@@ -31,7 +31,12 @@ workflows:
             - before_approval
       - deploy-prod:
           requires:
-            - approval
+            # to require manual approval, just requires "approval" job
+            - build
+          filters:
+            # if manual approval is required, this filtering is not necessary
+            branches:
+              only: master
 
 # ------------------------------------------------------------------------------
 # Executors: list of executing environments (requires version: 2.1)
