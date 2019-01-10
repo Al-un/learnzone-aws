@@ -1,19 +1,23 @@
+# Define default environment when on a given git branch. Don't know how to
+# make it work with pattern such as "release/*"
 branch-defaults:
   develop:
     environment: learnzone-aws-dev
   master:
     environment: learnzone-aws
+# Default AWS CodeCommit repository/branch
 environment-defaults:
   learnzone-aws:
-    branch: master
+    branch: null
     repository: null
   learnzone-aws-dev:
-    branch: develop
+    branch: null
     repository: null
 global:
   application_name: learnzone
   default_ec2_keyname: learnzone
-  default_platform: arn:aws:elasticbeanstalk:eu-west-3::platform/Puma with Ruby 2.5
+  default_platform:
+    arn:aws:elasticbeanstalk:eu-west-3::platform/Puma with Ruby 2.5
     running on 64bit Amazon Linux/2.8.7
   default_region: eu-west-3
   include_git_submodules: true

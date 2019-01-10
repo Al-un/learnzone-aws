@@ -1,84 +1,94 @@
+# Global CircleCI used version
+version: 2.1
+
+# ------------------------------------------------------------------------------
+# Workflows
+# version is set at 2
+# ------------------------------------------------------------------------------
 workflows:
   version: 2
   # Staging deployment
   build-deploy:
     jobs:
       - build
-      - deploy-prod:
-          requires:
-            - build
-          filters:
-            branches:
-              only: master
       - deploy-dev:
           requires:
             - build
           filters:
             branches:
               only: develop
+      # request approval on Slack
+      - before_approval:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+      # testing manual approval
+      - approval: # <<< A job that will require manual approval in the CircleCI web application.
+          type: approval # <<< This key-value pair will set your workflow to a status of "On Hold"
+          requires: # We only run the "hold" job when test2 has succeeded
+            - before_approval
+          # filters:
+          #   branches:
+          #     only: master
+      - deploy-prod:
+          requires:
+            - approval
+          filters:
+            branches:
+              only: master
+  nightly:
+    triggers:
+      - schedule:
+          # https://crontab.guru/
+          # Time is UTC
+          cron: '31 * * * *'
+          filters:
+            branches:
+              only:
+                - develop
+    jobs:
+      - build
 
-version: 2
-
-jobs:
-  build:
+# ------------------------------------------------------------------------------
+# Executors: list of executing environments (requires version: 2.1)
+# https://circleci.com/docs/2.0/configuration-reference/#executors-requires-version-21
+# ------------------------------------------------------------------------------
+executors:
+  app-builder:
     docker:
-      # specify the version you desire here
-      # >> https://hub.docker.com/r/circleci/ruby/
       - image: circleci/ruby:2.5.1-node-browsers
-        environment:
-          RAILS_ENV: test
-          # https://circleci.com/docs/2.0/databases/
-          DATABASE_TEST_URL: postgresql://root@localhost/circle_test
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
+      # Examples
+      # environment:
+      #   RAILS_ENV: test
+      #   DATABASE_TEST_URL: postgresql://root@localhost/circle_test
+      # If there were a need of a DB for testing
       - image: circleci/postgres:9.6.5-alpine-ram
     working_directory: ~/repo
-
-    steps:
-      - checkout
-
-      # === Dependencies ===
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - learnzone-aws-dependencies-{{ checksum "Gemfile.lock" }}
-            # fallback to using the latest cache if no exact match is found
-            - learnzone-aws-dependencies-
-      - run:
-          name: Install dependencies
-          command: bundle install --jobs=4 --retry=3 --path vendor/bundle
-      - save_cache:
-          paths:
-            - ./vendor/bundle
-          key: learnzone-aws-dependencies-{{ checksum "Gemfile.lock" }}
-
-  deploy-dev:
+  aws-deployer:
     docker:
       - image: circleci/python:3.7.2-stretch-node-browsers-legacy
-    steps:
-      - checkout
-      - run:
-          name: Install EB CLI
-          command: sudo pip install awsebcli --upgrade
-      - run:
-          name: Create AWS credentials manually
-          command: |
-            mkdir ~/.aws
-            touch ~/.aws/config
-            chmod 600 ~/.aws/config
-            echo "[profile eb-cli]" > ~/.aws/config
-            echo "aws_access_key_id=$AWS_ACCESS_KEY_ID" >> ~/.aws/config
-            echo "aws_secret_access_key=$AWS_SECRET_ACCESS_KEY" >> ~/.aws/config
-      - run:
-          name: Deploy to AWS EB (Dev)
-          command: eb deploy learnzone-aws-dev --profile eb-cli --label learnzone-aws-dev-$CIRCLE_BUILD_NUM
 
-  deploy-prod:
-    docker:
-      - image: circleci/python:3.7.2-stretch-node-browsers-legacy
+# ------------------------------------------------------------------------------
+# Orbs: pre-configuration (requires version: 2.1)
+# https://circleci.com/docs/2.0/using-orbs/
+# ------------------------------------------------------------------------------
+orbs:
+  # https://github.com/CircleCI-Public/slack-orb
+  slack: circleci/slack@1.0.0
+
+# ------------------------------------------------------------------------------
+# Executors: list of re-usable commands (requires version: 2.1)
+# https://circleci.com/docs/2.0/configuration-reference/#commands-requires-version-21
+# ------------------------------------------------------------------------------
+commands:
+  deploy-aws-eb:
+    description: 'Deploy to AWS Elastic Beanstalk'
+    parameters:
+      env:
+        type: string
     steps:
-      - checkout
       - run:
           name: Install EB CLI
           command: sudo pip install awsebcli --upgrade
@@ -93,4 +103,59 @@ jobs:
             echo "aws_secret_access_key=$AWS_SECRET_ACCESS_KEY" >> ~/.aws/config
       - run:
           name: Deploy to AWS EB (Prod)
-          command: eb deploy learnzone-aws --profile eb-cli --label learnzone-aws-$CIRCLE_BUILD_NUM
+          command: eb deploy << parameters.env >> --profile eb-cli --label << parameters.env >>-$CIRCLE_BUILD_NUM
+
+# ------------------------------------------------------------------------------
+# Jobs: list of workflow jobs
+# ------------------------------------------------------------------------------
+jobs:
+  # Dependencies installation
+  build:
+    executor: app-builder
+    steps:
+      - checkout
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - learnzone-aws-dependencies-{{ checksum "Gemfile.lock" }}
+            # fallback to using the latest cache if no exact match is found
+            - learnzone-aws-dependencies-
+      - run:
+          name: Install dependencies
+          command: bundle install --jobs=4 --retry=3 --path vendor/bundle
+      - save_cache:
+          paths:
+            - ./vendor/bundle
+          key: learnzone-aws-dependencies-{{ checksum "Gemfile.lock" }}
+      - slack/notify
+
+  # Hey! approve!
+  before_approval:
+    docker: # executor type
+      - image: buildpack-deps:trusty # primary container will run Ubuntu Trusty
+    steps:
+      - slack/notify:
+          # Optional: Enter your own message
+          message: 'A deploy is on hold for a manual approval: https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID'
+          # Optional: Enter the Slack IDs of any user or group (sub_team) to be mentioned
+          mentions: 'alun'
+          # Optional: Assign custom colors for each notification
+          color: '#e5bd0b'
+          # Optional: Enter a specific webhook here or the default will use $SLACK_WEBHOOK
+          # webhook: 'webhook'
+
+  # Deploy to dev
+  deploy-dev:
+    executor: aws-deployer
+    steps:
+      - checkout
+      - deploy-aws-eb:
+          env: learnzone-aws-dev
+
+  # Deploy to prod
+  deploy-prod:
+    executor: aws-deployer
+    steps:
+      - checkout
+      - deploy-aws-eb:
+          env: learnzone-aws
